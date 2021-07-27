@@ -42,7 +42,7 @@ function getUrlFromPathname(pathname = window.location.pathname) {
 
     return `/mfe/${microFrontend.name}`
 }
-
+const CLASS_NAME = 'mounted-by-bootstrap';
 function moveNodeToDocument(parent, document) {
     return function moveNode(node) {
         // Cloning or Adopting <scripts> nodes doesn't re-evaluate them
@@ -52,23 +52,33 @@ function moveNodeToDocument(parent, document) {
 
             [...node.attributes].forEach(attribute => clonedNode.setAttribute(attribute.name, attribute.value));
             clonedNode.innerHTML = node.innerHTML;
-
+            clonedNode.classList.add(CLASS_NAME);
             parent.appendChild(clonedNode);
             return;
         }
 
         const adoptedNode = document.adoptNode(node);
+        adoptedNode.classList.add(CLASS_NAME);
         parent.appendChild(adoptedNode);
     }
 }
 
 function addOrUpdateBaseTag(url) {
+    const [existingBaseElement] = document.getElementsByTagName('base');
+
+    if (existingBaseElement) {
+        existingBaseElement.setAttribute('href', url);
+        return;
+    }
+
     const baseElement = document.createElement('base');
     baseElement.setAttribute('href', url);
     document.head.appendChild(baseElement);
 }
 
 function mount(url, microFrontendDocument) {
+    console.log(document)
+    console.log(microFrontendDocument)
     addOrUpdateBaseTag(url)
 
     const microFrontendHeadNodes = microFrontendDocument.querySelectorAll('head>*');
@@ -79,9 +89,9 @@ function mount(url, microFrontendDocument) {
 }
 
 
-// const url = getUrlFromPathname();
-// console.log(url)
+const url = getUrlFromPathname();
+console.log(url)
 
-// downloadDocument(getUrlFromPathname())
-//     .then(doc => mount(url, doc))
-downloadDocument("music").then(doc => mount("music", doc))
+downloadDocument(url)
+    .then(doc => mount(url, doc))
+//downloadDocument("/mfe/welcome").then(doc => mount("/mfe/welcome", doc))
